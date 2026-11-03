@@ -35,7 +35,27 @@ class DepositoStrumenti:
             Funzione che legge tutti gli strumenti nel database
             :return: una lista con tutti gli strumenti presenti oppure None
         """
-        # TODO
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            query = "SELECT * FROM strumento"
+            cursor.execute(query)
+
+            risultato = []
+            for row in cursor.fetchall():
+                # Assumendo che il costruttore di Strumento rispetti l'ordine delle colonne SQL:
+                # codice, tipo, marca, anno_acquisto, valore, disponibile
+                strumento = Strumento(row[0], row[1], row[2], row[3], row[4], row[5])
+                risultato.append(strumento)
+
+            cursor.close()
+            conn.close()
+            return risultato
+
+        except Exception as e:
+            print(f"Errore DB in get_strumenti: {e}")
+            return None
 
     def cerca_strumenti_per_tipo(self, tipo) -> list[Strumento] | None:
         """
@@ -43,4 +63,23 @@ class DepositoStrumenti:
             :param tipo: il tipo dello strumento (es. "Chitarra")
             :return: una lista con tutti gli strumenti del tipo indicato oppure None
         """
-        # TODO
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            # Utilizzo del parametro %s per evitare SQL Injection
+            query = "SELECT * FROM strumento WHERE tipo = %s"
+            cursor.execute(query, (tipo,))
+
+            risultato = []
+            for row in cursor.fetchall():
+                strumento = Strumento(row[0], row[1], row[2], row[3], row[4], row[5])
+                risultato.append(strumento)
+
+            cursor.close()
+            conn.close()
+            return risultato
+
+        except Exception as e:
+            print(f"Errore DB in cerca_strumenti_per_tipo: {e}")
+            return None
